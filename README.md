@@ -2,7 +2,7 @@
 
 把 [MiniMax Design（Hilo，桌面端创作 Agent IDE，4.0.1 构建）](https://design.minimax.cn)接入 magpie 的插件：用 Hilo 自己的桌面登录态说话——它自己的模型目录、它自己的积分钱包，不借用 MiniMax Code 的任何登录或配置。
 
-状态行：登录、模型目录、积分窗口、对话全部实测通过（2026-10-17，本机 4.0.1 构建）。
+状态：登录、模型目录、积分窗口、对话均已实测通过（2026-10-17，4.0.1 构建，Windows）。
 
 ## 登录什么、怎么登录
 
@@ -19,16 +19,11 @@ MiniMax Design 桌面端把登录态存在：
 1. `desktop`：直接读上面那份桌面登录态（首选，不用你贴任何东西）；
 2. `api`：把 token 手动贴进来。
 
-## 它跟 MiniMax Code 不是一个东西
+## 和 MiniMax Code 的区别
 
-| | MiniMax Design (Hilo) | MiniMax Code (mcode) |
-|---|---|---|
-| 数据目录 | `%APPDATA%\@hilo\desktop` | `%APPDATA%\MiniMax Code` |
-| 对话端点 | `hub.minimaxi.com/api/v1/messages` | mcode 自己的网关 |
-| 模型目录端点 | `design.minimax.cn/api/v1/config` | `~/.minimax/config.yaml` |
-| 账号 id | `5672033…67974` | `5638456…372165` |
-
-两边的积分钱包也是分开的。注意：`~/.minimax/config.yaml` 里那份 magpie-provider 配置属于 MiniMax Code；MiniMax Design 这边没有 3425 端口的配置文件，所以对话路由不会绕回它自己。
+MiniMax Design 与 MiniMax Code（mcode）是两条产品线：登录态、对话端点、模型目录和积分钱包都不共用，
+所以本插件与 `@magpie-community/opencode-minimax-auth` 是两个供应商，装哪个都不会互相覆盖。
+顺带一句：`~/.minimax` 是 MiniMax Code 的目录，不是 MiniMax Design 的。
 
 ## 模型
 
@@ -40,12 +35,12 @@ MiniMax Design 桌面端把登录态存在：
 
 ## 积分
 
-积分来自 `GET /api/v1/credit/wallet` 和 `/api/v1/credit/balance`（`token:` 头，数字是字符串）。每个钱包一个窗口、每个 `sub_credits` 来源一个侧窗；`end_time` 已过的来源被丢弃；最早流失的那笔显示为 `runsOut`/`runsOutAt`。本机实测那条 3000 就挂在明天到期的一笔赠送积分上。
+积分来自 `GET /api/v1/credit/wallet` 和 `/api/v1/credit/balance`（`token:` 头，数字是字符串）。每个钱包一个窗口、每个 `sub_credits` 来源一个侧窗；`end_time` 已过的来源被丢弃；最早流失的那笔显示为 `runsOut`/`runsOutAt`，magpie 的 smart 路由会先烧它。
 
 ## 装上 / 试
 
 ```sh
-magpie plugin add ./opencode-minimax-design-auth   # 本仓库目录，或 git clone 下来的路径
+magpie plugin add github:cuddlesgiggles/minimax-design-auth   # 或本地 clone 后：magpie plugin add ./minimax-design-auth
 magpie plugin login minimax-design
 node --test                      # 14 条
 npm run mutate                   # 11 个变异，全要变红
