@@ -78,16 +78,16 @@ test("decryptToken: the v2enc envelope, and every way it can be wrong", () => {
 })
 
 test("readSession: decrypts the app's token and says which file was missing", () => {
-  const token = jwt({ exp: 1795543971, user: { id: "563845620162457602", name: "探索者", deviceID: "" } })
+  const token = jwt({ exp: 1795543971, user: { id: "440000000000000001", name: "示例", deviceID: "" } })
   const { appData } = fixture({
-    "hub-config.json": JSON.stringify({ tokens: { accessToken: encrypt(token), adAttribution: null }, user: { userID: "567203392304467974", userName: "探索者7602" }, lkgProviderConfig: "" }),
+    "hub-config.json": JSON.stringify({ tokens: { accessToken: encrypt(token), adAttribution: null }, user: { userID: "440000000000000002", userName: "示例用户" }, lkgProviderConfig: "" }),
     ".token-key": KEY,
   })
   const s = readSession("/unused", appData)
   assert.equal(s.token, token)
   // the file's own record wins over the JWT for the id, and they differ on this account
-  assert.equal(s.userId, "567203392304467974")
-  assert.equal(s.userName, "探索者7602")
+  assert.equal(s.userId, "440000000000000002")
+  assert.equal(s.userName, "示例用户")
   assert.equal(s.deviceId, "")
   assert.equal(s.expires, 1795543971 * 1000)
 
@@ -351,15 +351,15 @@ test("usage: wallet and balance together, a refused one reported as the account"
 })
 
 test("the desktop method reports the token's own end, since nothing renews it", async () => {
-  const token = jwt({ exp: 1795543971, user: { id: "563845620162457602" } })
-  const f = fixture({ "hub-config.json": JSON.stringify({ tokens: { accessToken: encrypt(token) }, user: { userID: "567203392304467974", userName: "探索者7602" } }), ".token-key": KEY })
+  const token = jwt({ exp: 1795543971, user: { id: "440000000000000001" } })
+  const f = fixture({ "hub-config.json": JSON.stringify({ tokens: { accessToken: encrypt(token) }, user: { userID: "440000000000000002", userName: "示例用户" } }), ".token-key": KEY })
   const hooks = await MiniMaxDesignAuthPlugin({}, { home: "/unused", userData: f.appData })
   const m = hooks.auth.methods[0]
   const flow = await m.authorize()
   const r = await flow.callback()
   assert.equal(r.type, "success")
   assert.equal(r.source, "desktop")
-  assert.equal(r.accountId, "567203392304467974")
+  assert.equal(r.accountId, "440000000000000002")
   assert.equal(r.expires, 1795543971 * 1000)
   assert.equal(r.refresh, "", "no refresh token in the file, so nothing to renew with")
 
